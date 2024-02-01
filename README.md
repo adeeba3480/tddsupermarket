@@ -54,4 +54,57 @@ mvn clean test
 - Deploy the application using container or as a lambda securely in AWS using IaC
 - Implement CDN caching for the application
 - You have two days to come up with the solution, share the URL to the app and the github code
-- Reach out to disha.2.gupta@bt.com to arrange the review 
+###SOLUTION:
+1.Added below dependency to avoid httpclient error in the initial mvn clean spring:run
+2. 		<dependency>
+    	<groupId>org.apache.httpcomponents</groupId>
+    	<artifactId>httpclient</artifactId>
+    	<version>4.5.14</version>
+</dependency>
+3.Create jar file  tdd-supermarket-1.0.0.jar by mvn clean install
+4.Run mvn clean spring:run and mvn clean test ,Application was up and reachable to http://localhost:8080/ ,Refer Tddsupermarket.PNG
+5.Create Dockerfile 
+6.Build image using docker desktop on local ,Image name:adeeba3480/tdd-supermarket:latest
+7.Push local image to ECR ,After installing AWS CLI in local AWSCLIV2.msi from https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+###
+C:\Users>aws configure
+AWS Access Key ID [None]:
+AWS Secret Access Key [None]: 
+Default region name [None]: ap-south-1
+Default output format [None]: json
+
+C:\Users>aws ecr get-login-password --region ap-south-1| docker login --username AWS --password-stdin 058264341297.dkr.ecr.ap-south-1.amazonaws.com
+Login Succeeded
+
+C:\Users>docker tag adeeba3480/tdd-supermarket:latest 058264341297.dkr.ecr.ap-south-1.amazonaws.com/tddsupermarket
+
+C:\Users>docker push 058264341297.dkr.ecr.ap-south-1.amazonaws.com/tddsupermarket
+Using default tag: latest
+The push refers to repository [058264341297.dkr.ecr.ap-south-1.amazonaws.com/tddsupermarket]
+d0b9f5ab708a: Pushed
+b6aec3236c10: Pushed
+d9907b0445f9: Pushed
+latest: digest: sha256:xxxxxx size: 954
+
+C:\Users>
+Login Succeeded
+#####
+
+8.Verify the image at https://ap-south-1.console.aws.amazon.com/ecr/private-registry/repositories?region=ap-south-1
+
+9.Create ECS 
+-Creat Task defination using  tddsupermarket-AWS-CLI.json
+-Create CLuster using fargate instance and sg config 
+- Scan the image and Copy the public ip of the ECS http://52.66.86.91:8080/ Refer output in Tddsupermarket.PNG
+- Verified the container logs as well which has SPRING boot running info
+   or
+10 .I did create EC2 instance using terraform Iac script Terraform scripts.rtf
+  -DId Manual installtion Using of docker using yum commands .
+  -After pushing the image and docker run -p 8080:8080 adeeba3480/tdd-supermarket:latest started the application
+  -Unfortunately IP of the EC2 instance wasnt reachable to get the output in browser ,I had created using ECR and ECS .
+  -Later figured out security group wasnt properly configured the rules for inbound and outbound caused the issue .
+
+ ** ####THANK YOU**
+  
+Note:
+CDN caching is pending because I'm not sure on CDN and it had paid service [couldnt opt due to free account access].
